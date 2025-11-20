@@ -1,7 +1,7 @@
 "use client"
 
 import { useStore } from "@/src/store"
-import { Product } from "@prisma/client"
+import { Product } from "@/src/generated/prisma"
 
 type Props = {
     product : Product
