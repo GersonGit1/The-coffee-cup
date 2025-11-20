@@ -1,36 +1,197 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+The Coffee cup — Real-Time Kitchen Dashboard (Next.js)
 
-## Getting Started
+Un sistema completo para gestión de pedidos en restaurantes, desarrollado con Next.js, Prisma, PostgreSQL, Zustand, React Query y Pusher para actualizaciones en tiempo real.
 
-First, run the development server:
+El proyecto permite que los clientes creen pedidos, la cocina los gestione en un dashboard en vivo y ambos lados mantengan sincronización instantánea del estado de la orden.
 
-```bash
+🚀 Tecnologías Principales
+
+Next.js 14 (App Router)
+
+Prisma ORM
+
+PostgreSQL
+
+Pusher Channels (tiempo real)
+
+Zustand (estado del carrito y orden activa)
+
+React Query (cache + invalidaciones inteligentes)
+
+TailwindCSS
+
+Server Actions
+
+TypeScript
+
+Zod (validaciones)
+
+🧠 Características Principales
+🛒 1. Carrito y creación de pedidos (Cliente)
+
+El cliente selecciona productos desde la UI.
+
+Carrito manejado con Zustand.
+
+Validación del pedido con Zod.
+
+Guarda orden + productos relacionados en la BD.
+
+Se crea automáticamente un canal dinámico Pusher por orden (order-{id}).
+
+El cliente recibe notificaciones en tiempo real del estado de su pedido.
+
+👨‍🍳 2. Dashboard en tiempo real para Cocina
+
+Vista en vivo de órdenes pending y preparing.
+
+Cada acción del staff:
+
+pending → preparing
+
+preparing → ready
+
+canceled
+
+Dispara eventos Pusher que actualizan automáticamente la UI:
+
+new-order
+
+preparing-order
+
+ready-order
+
+canceled-order
+
+🔄 3. Actualización automática con React Query + Pusher
+
+El dashboard invalida automáticamente la query de órdenes cuando recibe eventos del canal principal:
+
+channel.bind("new-order", handler);
+channel.bind("preparing-order", handler);
+channel.bind("ready-order", handler);
+channel.bind("canceled-order", handler);
+
+📦 4. Estado sincronizado del cliente (Zustand)
+
+Después de crear un pedido:
+
+Se limpia el carrito.
+
+Se almacena currentOrder para mostrar el estado de la orden.
+
+El canal order-{id} escucha cambios del servidor para actualizar la UI.
+
+Cuando la orden termina:
+
+currentOrder se limpia automáticamente si está en "ready" o "canceled".
+
+🧱 5. Base de datos con Prisma
+
+Relaciones:
+
+Order → OrderProducts → Product
+
+
+Los productos del pedido se crean mediante un createMany implícito en Prisma.
+
+Cada orden incluye:
+
+{
+  id,
+  name,
+  total,
+  status,
+  date,
+  readyAt,
+  OrderProducts: [
+    { id, productId, quantity, product: {...} }
+  ]
+}
+
+🛠️ 6. Server Actions para operaciones CRUD
+
+createOrder
+
+changeStatusOrder
+
+cancelOrder
+
+Implementadas con validaciones Zod y protección de errores.
+
+📡 Arquitectura en Tiempo Real
+Canales usados:
+Canal global de cocina
+
+orders-channel
+
+new-order
+
+preparing-order
+
+ready-order
+
+canceled-order
+
+Canales dinámicos por cliente
+
+order-{id}
+
+order-status-changed
+
+Esto permite:
+
+Cocina: ver siempre la cola en tiempo real.
+
+Cliente: recibir cambios sin recargar ni consultar nada.
+
+📦 Scripts de instalación
+npm install
+npx prisma generate
+npx prisma db push
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Configurar variables de entorno:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+DATABASE_URL=
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
+NEXT_PUBLIC_CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+PUSHER_APP_ID=
+PUSHER_SECRET=
+NEXT_PUBLIC_PUSHER_KEY=
+NEXT_PUBLIC_PUSHER_CLUSTER=
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+✔️ Características completadas
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+ Crear pedido con productos
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+ Guardar pedido en la BD
 
-## Deploy on Vercel
+ Mostrar pedido al cliente en vivo
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+ Dashboard de cocina en tiempo real
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+ Cambiar estado de órdenes
+
+ Cancelación de órdenes
+
+ Canales dinámicos por orden (cliente)
+
+ Limpieza automática de estados (Zustand)
+
+ UI completa con TailwindCSS
+
+ Queries reactivas con React Query
+
+ Server Actions con validación Zod
+
+🧑‍💻 Autor
+
+Desarrollado por Gerson Amaya como parte de un sistema de gestión de pedidos moderno y escalable.
+
+📝 Licencia
+
+MIT
