@@ -1,8 +1,13 @@
 import { products } from "./data/products";
 import { categories } from "./data/categories";
-import { PrismaClient } from "@/src/generated/prisma/client";
+import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const prisma =  new PrismaClient();
+const connectionString = `${process.env.DATABASE_URL}`
+
+const adapter = new PrismaPg({ connectionString })
+
+const prisma =  new PrismaClient({ adapter });
 
 async function main() {
     try {

@@ -1,4 +1,4 @@
-import { Product } from "@/src/generated/prisma";
+import { Product } from "@/generated/prisma/client";
 import z from "zod";
 import { OrderWhitProductSchema } from "../schema";
 
