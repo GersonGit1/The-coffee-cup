@@ -39,7 +39,7 @@ model Order {
   name          String
   total         Float
   date          DateTime        @default(now())
-  status        Boolean         @default(false)
+  status        String          @default("pending")
   readyAt       DateTime?
   OrderProducts OrderProducts[]
 }
