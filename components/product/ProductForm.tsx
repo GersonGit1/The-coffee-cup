@@ -1,6 +1,6 @@
 import { prisma } from "@/src/lib/prisma"
 import ImageUpload from "./ImageUpload"
-import { Product } from "@/src/generated/prisma"
+import { Product } from "@/generated/prisma/client";
 
 type props = {
     product? : Product
