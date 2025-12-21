@@ -6,7 +6,8 @@ import { ProductSchemaServer } from "@/src/schema";
 type data = {
     name: string;
     price: number;
-    categoryId: number;
+    categoryId: string;
+    BusinessId: string;
     image: string;
 }
 

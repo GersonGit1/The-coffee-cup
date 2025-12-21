@@ -3,8 +3,22 @@
 import { prisma } from "@/src/lib/prisma";
 import { pusherServer } from "@/src/lib/pusher-server";
 import { OrderCardSchema } from "@/src/schema";
+import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const changeStatusOrder = async (formData: FormData) => {
+    const headersList = await headers();
+    const business =  headersList.get("x-business-slug");
+    const sessionCookie = (await cookies()).get("session");
+    if (!sessionCookie) {
+    redirect(`/${business}/login`);
+    }
+    
+    const session = JSON.parse(
+    decodeURIComponent(sessionCookie.value)
+    );
+    const businessId =  session.businessId ?? "";
+    
     const data = {
         OrderId :  formData.get('orderId'),
         status :  formData.get('orderStatus'),
@@ -40,8 +54,8 @@ export const changeStatusOrder = async (formData: FormData) => {
                 },
             });
 
-            await pusherServer.trigger("orders-channel", event, order);
-            await pusherServer.trigger(`order-${order.id}`, "order-status-changed", order);
+            await pusherServer.trigger(`${businessId}-orders-channel`, event, order);
+            await pusherServer.trigger(`${businessId}-order-${order.id}`, "order-status-changed", order);
         } catch (error) {
             console.log(error);
             //return { errors: [{ message: "Something went wrong"}] };

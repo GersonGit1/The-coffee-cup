@@ -4,28 +4,28 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { pusherClient } from "@/src/lib/pusher-client";
 
-async function fetchPendingOrders() {
-  const res = await fetch("/admin/orders/api");
+async function fetchPendingOrders(businessSlug: string) {
+  const res = await fetch(`/${businessSlug}/admin/orders/api`);
   return res.json();
 }
 
-export function usePendingOrders() {
+export function usePendingOrders(businessId: string, businessSlug: string) {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["pendingOrders"],
-    queryFn: fetchPendingOrders,
+    queryKey: ["pendingOrders", businessId],
+    queryFn: () => fetchPendingOrders(businessSlug),
   });
 
   useEffect(() => {
-    const channel = pusherClient.subscribe("orders-channel");
+    const channel = pusherClient.subscribe(`${businessId}-orders-channel`);
 
     let timer: any;
 
     const handler = () => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        queryClient.invalidateQueries({queryKey: ['pendingOrders']});
+        queryClient.invalidateQueries({queryKey: ["pendingOrders", businessId]});
       }, 150);
     };
 
@@ -39,7 +39,7 @@ export function usePendingOrders() {
       channel.unbind("ready-order", handler);
       channel.unbind("preparing-order", handler);
       channel.unbind("canceled-order", handler);
-      pusherClient.unsubscribe("orders-channel");
+      pusherClient.unsubscribe(`${businessId}-orders-channel`);
     };
   }, [queryClient]);
 

@@ -4,23 +4,34 @@ import { Product } from "@/generated/prisma/client";
 
 interface Store {
     order: OrderItem[];
-    currentOrder: currentOrderType | null;
-    setCurrentOrder: (order: currentOrderType | null) => void;
+    activeOrders: currentOrderType[];
+    addActiveOrder: (order: currentOrderType) => void;
+    updateOrderStatus: (orderId: string, status: string) => void;
+    removeActiveOrder: (orderId: string) => void;
     addToOrder: (product: Product) => void;
     increaseQuantity: (productId: Product['id']) => void;
     decreaseQuantity: (productId: Product['id']) => void;
     removeFromOrder: (productId: Product['id']) => void;
-    clearCurrentOrderIfFinished: (status: string) => void;
-    updateCurrentOrderStatus: (status: string) => void;
     clearOrder: () => void;
 }
 
 export const useStore = create<Store>((set, get) => ({
     order: [],
-    currentOrder: null,
-    setCurrentOrder: (order) => {
-        set(() => ({ currentOrder: order }));
-    },
+    activeOrders: [],
+    addActiveOrder: (order) =>
+    set(state => ({
+      activeOrders: [...state.activeOrders, order]
+    })),
+    updateOrderStatus: (orderId, status) =>
+        set(state => ({
+        activeOrders: state.activeOrders.map(o =>
+            o.id === orderId ? { ...o, status } : o
+        )
+    })),
+    removeActiveOrder: (orderId) =>
+        set(state => ({
+        activeOrders: state.activeOrders.filter(o => o.id !== orderId)
+    })),
     addToOrder: (product: Product) =>{
         const {categoryId, image, ...data} = product;
         let order : OrderItem[] = [];
@@ -63,23 +74,6 @@ export const useStore = create<Store>((set, get) => ({
         set((state)=>({
             order : state.order.filter(item => item.id !== productId)
         }))
-    },
-    clearCurrentOrderIfFinished: (status) => {
-        console.log(status);
-        
-        if (["ready", "canceled"].includes(status)) {
-            console.log('seteando null');
-            
-            set(() => ({ currentOrder: null }));
-        }
-    },
-    updateCurrentOrderStatus: (status) => {
-        console.log('change status to: ',status);
-        
-        set((state) => state.currentOrder 
-            ? { currentOrder: { ...state.currentOrder, status } } 
-            : {}
-        );
     },
     clearOrder: () => {
         set(()=>({

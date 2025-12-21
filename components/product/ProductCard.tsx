@@ -16,6 +16,7 @@ export default function ProductCard({product}: ProductCardProps) {
         alt={product.name}
         width={400}
         height={500}
+        priority
         className="w-full h-64 object-cover"
       />
       <div className="p-5">
