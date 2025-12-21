@@ -1,19 +1,37 @@
 import { prisma } from "@/src/lib/prisma"
 import ImageUpload from "./ImageUpload"
 import { Product } from "@/generated/prisma/client";
+import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 type props = {
     product? : Product
 }
 
-async function getCategories() {
-    const categories = await prisma.category.findMany()
+async function getCategories(businessId: string) {
+    const categories = await prisma.category.findMany({
+        where:{
+            isDeleted: false,
+            BusinessId: businessId
+        }
+    })
     return categories
 }
 
 export default async function ProductForm({product}:props) {
-    const categories = await getCategories();
+    const headersList = await headers();
+    const business =  headersList.get("x-business-slug");
+    const sessionCookie = (await cookies()).get("session");
+    if (!sessionCookie) {
+        redirect(`/${business}/login`);
+    }
     
+    const session = JSON.parse(
+    decodeURIComponent(sessionCookie.value)
+    );
+    const businessId =  session.businessId ?? "";
+    const categories = await getCategories(businessId);
+
     return (
         <>
             <div className="space-y-2">

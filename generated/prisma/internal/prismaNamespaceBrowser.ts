@@ -51,6 +51,7 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  Business: 'Business',
   Category: 'Category',
   Product: 'Product',
   Order: 'Order',
@@ -74,10 +75,24 @@ export const TransactionIsolationLevel = {
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const BusinessScalarFieldEnum = {
+  id: 'id',
+  nombre: 'nombre',
+  slug: 'slug',
+  logo: 'logo',
+  createdAt: 'createdAt'
+} as const
+
+export type BusinessScalarFieldEnum = (typeof BusinessScalarFieldEnum)[keyof typeof BusinessScalarFieldEnum]
+
+
 export const CategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  slug: 'slug'
+  slug: 'slug',
+  isDeleted: 'isDeleted',
+  deletedAt: 'deletedAt',
+  BusinessId: 'BusinessId'
 } as const
 
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
@@ -89,9 +104,11 @@ export const ProductScalarFieldEnum = {
   price: 'price',
   image: 'image',
   imagePublicId: 'imagePublicId',
+  isAvailable: 'isAvailable',
   isDeleted: 'isDeleted',
   deletedAt: 'deletedAt',
-  categoryId: 'categoryId'
+  categoryId: 'categoryId',
+  BusinessId: 'BusinessId'
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
@@ -103,7 +120,8 @@ export const OrderScalarFieldEnum = {
   total: 'total',
   date: 'date',
   status: 'status',
-  readyAt: 'readyAt'
+  readyAt: 'readyAt',
+  BusinessId: 'BusinessId'
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
@@ -123,7 +141,8 @@ export const UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
   email: 'email',
-  password: 'password'
+  password: 'password',
+  BusinessId: 'BusinessId'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]

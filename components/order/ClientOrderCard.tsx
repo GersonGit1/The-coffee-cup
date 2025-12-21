@@ -3,17 +3,20 @@ import { currentOrderType } from "@/src/types";
 
 interface Props {
   order: currentOrderType;
+  removeActiveOrder: (orderId: string) => void;
 }
 
-export function ClientOrderCard({ order }: Props) {
-
+export function ClientOrderCard({ order, removeActiveOrder }: Props) {
   const cancel = async () => {
-     await cancelOrder(order.id);
+    const result = await cancelOrder(order.id);
+    if (result.success) {
+      removeActiveOrder(order.id);
+    }
   }
-
+  
   return (
     <div className="p-5 border rounded-xl mt-5 space-y-3">
-      <h2 className="text-xl font-bold">Pedido #{order.id}</h2>
+      <h2 className="text-xl font-bold">Pedido # {order.id.toString().substring(0, 8)}</h2>
 
       <p className="text-gray-700 font-semibold">
         Estado: <span className="capitalize">{order.status}</span>

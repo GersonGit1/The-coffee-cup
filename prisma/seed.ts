@@ -1,7 +1,6 @@
-import { products } from "./data/products";
-import { categories } from "./data/categories";
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcrypt";
 
 const connectionString = `${process.env.DATABASE_URL}`
 
@@ -11,11 +10,37 @@ const prisma =  new PrismaClient({ adapter });
 
 async function main() {
     try {
-        await prisma.category.createMany({
-            data: categories
-        });
-        await prisma.product.createMany({
-            data : products
+        // await prisma.business.create({
+        //     data: {
+        //     nombre: "Comedor La Esquina",
+        //     slug: "comedor_la_esquina",
+        //     logo: null,
+        //     users: {
+        //         create: [
+        //         {
+        //             name: "Admin La Esquina",
+        //             email: "admin@laesquina.com",
+        //             password: await bcrypt.hash('theCoffeeCup', 10),
+        //         }
+        //         ]
+        //     }
+        //     }
+        // });
+        await prisma.business.create({
+            data: {
+            nombre: "Comedor Juanito",
+            slug: "comedor_juanito",
+            logo: null,
+            users: {
+                create: [
+                {
+                    name: "Admin Juanito",
+                    email: "admin@juanito.com",
+                    password: await bcrypt.hash('theCoffeeCup', 10),
+                }
+                ]
+            }
+            }
         });
     } catch (error) {
         console.log(error);

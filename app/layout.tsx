@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./Providers";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { BusinessProvider } from "@/src/context/BusinessContextType";
+import { getBusinessBySlug } from "@/src/utils/GetBusinessBySlug";
+import { log } from "console";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,11 +23,20 @@ export const metadata: Metadata = {
   description: "My quiosco app for your restaurant",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+ 
+  const businessSlug = (await headers()).get("x-business-slug");
+  log('Business slug from headers: ', businessSlug);
+  const business = await getBusinessBySlug(businessSlug!);
+  
+  if (!business) {
+    redirect("/not-found");
+  }
+  
   return (
     <html lang="en">
       <head>
@@ -33,7 +47,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
       >
         <Providers>
-          {children}
+          <BusinessProvider business={business}>
+            {children}
+          </BusinessProvider>
         </Providers>
       </body>
     </html>

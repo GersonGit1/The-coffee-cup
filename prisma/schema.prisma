@@ -7,48 +7,71 @@ datasource db {
   provider = "postgresql"
 }
 
+model Business {
+  id        String @id @default(cuid())
+  nombre    String
+  slug      String   @unique
+  logo      String?
+  users     User[]
+  categories Category[]
+  products  Product[]
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
 model Category{
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
   name String
   slug String
   products Product[]
+  isDeleted Boolean @default(false)
+  deletedAt DateTime?
+  BusinessId String
+  business Business @relation(fields: [BusinessId], references: [id])
 }
 
 model Product {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
   name String
   price Float
   image String
   imagePublicId String?
+  isAvailable  Boolean  @default(true)
   isDeleted Boolean @default(false)
   deletedAt DateTime?
-  categoryId Int
-  category Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+  BusinessId String
   orderProducts OrderProducts[]
+  category Category @relation(fields: [categoryId], references: [id])
+  business Business @relation(fields: [BusinessId], references: [id])
 }
 
 model Order {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
   name String
   total Float
   date DateTime @default(now())
   status String @default("pending")
   readyAt DateTime?
   OrderProducts OrderProducts[]
+  BusinessId String
+  business Business @relation(fields: [BusinessId], references: [id])
 }
 
 model OrderProducts {
-  id Int @id @default(autoincrement())
-  orderId Int
+  id String @id @default(cuid())
+  orderId String
   order Order @relation(fields: [orderId], references: [id])
-  productId Int
+  productId String
   product Product @relation(fields: [productId], references: [id])
   quantity Int
 }
 
 model User {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
   name String
   email String @unique
   password String
+  BusinessId String
+  business Business @relation(fields: [BusinessId], references: [id])
 }

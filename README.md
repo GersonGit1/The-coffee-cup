@@ -6,7 +6,7 @@ El proyecto permite que los clientes creen pedidos, la cocina los gestione en un
 
 🚀 Tecnologías Principales
 
-Next.js 14 (App Router)
+Next.js 16 (App Router)
 
 Prisma ORM
 
@@ -80,7 +80,7 @@ Se limpia el carrito.
 
 Se almacena currentOrder para mostrar el estado de la orden.
 
-El canal order-{id} escucha cambios del servidor para actualizar la UI.
+El canal {businessId}-order-{id} escucha cambios del servidor para actualizar la UI.
 
 Cuando la orden termina:
 
@@ -99,6 +99,7 @@ Cada orden incluye:
 
 {
   id,
+  businessId
   name,
   total,
   status,
@@ -133,9 +134,9 @@ ready-order
 
 canceled-order
 
-Canales dinámicos por cliente
+Canales dinámicos por cada orden y negocio
 
-order-{id}
+{businessId}-order-{id}
 
 order-status-changed
 

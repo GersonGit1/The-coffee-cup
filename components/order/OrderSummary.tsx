@@ -2,50 +2,31 @@
 
 import { useStore } from "@/src/store"
 import ProductDetails from "./ProductDetails";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { formatCurrency } from "@/src/utils/currency";
 import { createOrder } from "@/actions/create-order-action";
 import { OrderSchema } from "@/src/schema";
 import { toast } from "react-toastify";
-import { pusherClient } from "@/src/lib/pusher-client";
-import { currentOrderType } from "@/src/types";
 import { ClientOrderCard } from "./ClientOrderCard";
+import { useBusiness } from "@/src/context/BusinessContextType";
+import { useOrderSubscriptions } from "@/src/hooks/useOrderSuscription";
 
 export default function OrderSummary() {
+  const businessId = useBusiness().id;
   const order = useStore((state) => state.order);
-  const currentOrder = useStore((state) => state.currentOrder);
+  const removeActiveOrder = useStore((state) => state.removeActiveOrder);
   const clearOrder = useStore((state) => state.clearOrder);
-  const setCurrentOrder = useStore((state) => state.setCurrentOrder);
-  const clearCurrentOrderIfFinished = useStore((state) => state.clearCurrentOrderIfFinished);
-  const updateCurrentOrderStatus = useStore((state) => state.updateCurrentOrderStatus);
   const total = useMemo(()=> order.reduce((total, item) => total + item.subtotal, 0), [order]);
+  const activeOrders = useStore(s => s.activeOrders);
+  useOrderSubscriptions(businessId, activeOrders);
+  const addActiveOrder = useStore(s => s.addActiveOrder);
 
-  useEffect(() => {
-    if (!currentOrder?.id) return;
-
-    const channelName = `order-${currentOrder.id}`;
-    const channel = pusherClient.subscribe(channelName);
-
-    const handler = (order : currentOrderType) => {
-      clearCurrentOrderIfFinished(order.status);
-      updateCurrentOrderStatus(order.status);
-    };
-
-    channel.bind("order-status-changed", handler);
-
-    return () => {
-      channel.unbind("order-status-changed", handler);
-      pusherClient.unsubscribe(channelName);
-    };
-  }, [currentOrder]);
-
-  const handleCreateOrder = async (formData: FormData)=>{
+  const handleCreateOrder = async (formData: FormData)=>{    
     const data = {
       name: formData.get("name"),
       total: total,
       order: order
     };
-    
     const result = OrderSchema.safeParse(data);
     
     if(!result.success){
@@ -54,7 +35,8 @@ export default function OrderSummary() {
       })
       return;
     }
-
+    console.log('creando la orden', result.data);
+    
     const response = await createOrder(result.data);
     if(response?.errors){
       response?.errors.forEach(err => {
@@ -63,16 +45,22 @@ export default function OrderSummary() {
       return;
     }
 
-    setCurrentOrder(response.order)
     toast.success("Order created successfully");
+    addActiveOrder(response.order);
     clearOrder();
+    console.log('order length', order.length);
+    console.log('activeOrders length', activeOrders.length);
   }
   return (
     <aside className="lg:h-screen lg:overflow-y-scroll lg:w-96 md:w-64 p-5">
-        <h1 className="text-4xl text-center font-black">My Order</h1>
-        {order.length === 0 ? currentOrder == null ? <p className="text-center mt-10">No hay pedidios</p> :
+        <h1 className="text-2xl md:text-4xl text-center font-black">Mi orden</h1>
+
+        {order.length === 0 ? activeOrders.length === 0 ? <p className="text-center mt-10">No hay pedidios</p> :
         (
-          <ClientOrderCard order={currentOrder}/>
+          activeOrders && activeOrders.length > 0 ?
+          activeOrders.map((order) => 
+            <ClientOrderCard key={order.id} removeActiveOrder={removeActiveOrder} order={order}/>) 
+          : null
         ) : (
           <div className="mt-5">
             {order.map(item => (

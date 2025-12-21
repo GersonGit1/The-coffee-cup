@@ -4,16 +4,19 @@ import cloudinary from "@/src/lib/cloudinary";
 import { prisma } from "@/src/lib/prisma";
 import { ProductSchemaServer } from "@/src/schema";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
 type data = {
     name: string;
     price: number;
-    categoryId: number;
+    categoryId: string;
+    BusinessId: string;
     image: string;
     imagePublicId: string | null
 }
 
-export async function updateProduct(data:data, id: number){
+export async function updateProduct(data:data, id: string){
+    const business = (await headers()).get("x-business-slug");
     const result = ProductSchemaServer.safeParse(data);
     console.log(result);
     if(!result.success){
@@ -42,5 +45,5 @@ export async function updateProduct(data:data, id: number){
         },
     });
   
-    revalidatePath('/admin/products');
+    revalidatePath(`/${business}/admin/products`);
 }
